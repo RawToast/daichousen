@@ -20,7 +20,7 @@ resolvers ++= Seq(
   "Bintary JCenter" at "http://jcenter.bintray.com"
 )
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
 libraryDependencies += "org.mockito" % "mockito-core" % "2.9.0" % Test
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.1"
 
