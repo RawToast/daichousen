@@ -9,7 +9,7 @@ parallelExecution in Test:= false
 
 val SCALA_VERSION = "2.12.4"
 val CATS_VERSION = "1.0.1"
-val MONOCLE_VERSION = "1.5.0"
+val MONOCLE_VERSION = "1.5.0-cats"
 
 scalaVersion := SCALA_VERSION
 scalaVersion in ThisBuild := SCALA_VERSION
@@ -20,7 +20,7 @@ resolvers ++= Seq(
   "Bintary JCenter" at "http://jcenter.bintray.com"
 )
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
 libraryDependencies += "org.mockito" % "mockito-core" % "2.9.0" % Test
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.1"
 
@@ -34,7 +34,8 @@ def monocle = Seq(
 )
 
 def cats = Seq(
-  "org.typelevel" %% "cats-core" % CATS_VERSION
+  "org.typelevel" %% "cats-core" % CATS_VERSION,
+  "org.typelevel" %% "cats-free" % CATS_VERSION
 )
 
 // Code coverage
