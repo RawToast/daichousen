@@ -1,6 +1,6 @@
 package daibouken.data
 
-case class BattleState(player: Player, enemies: Seq[Enemy], messages: Seq[GameMessage])
+case class Battle(player: Player, enemies: Seq[Enemy], messages: Seq[GameMessage])
 
 case class GameMessage(text: String)
 
