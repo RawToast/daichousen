@@ -13,7 +13,7 @@ import org.scalatest.{Matchers, WordSpec}
 class ExploratoryFreeTest extends WordSpec with Matchers {
 
   type BattleStateT[A] = State[BattleState, A]
-  val pureCompiler: FunctionK[BattleCommandA,BattleStateT] = new (BattleCommandA ~> BattleStateT) {
+  val pureCompiler: FunctionK[BattleCommandA, BattleStateT] = new (BattleCommandA ~> BattleStateT) {
     def apply[A](fa: BattleCommandA[A]): BattleStateT[A] =
       fa match {
         case DealDamage(_, amount) => State.modify((x: BattleState) =>
