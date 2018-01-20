@@ -1,0 +1,9 @@
+language: scala
+jdk:
+  - oraclejdk8
+script:
+  - sbt clean test
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
