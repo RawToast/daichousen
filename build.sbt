@@ -9,7 +9,7 @@ parallelExecution in Test:= false
 
 val SCALA_VERSION = "2.12.4"
 val CATS_VERSION = "1.0.1"
-val MONOCLE_VERSION = "1.5.0"
+val MONOCLE_VERSION = "1.5.0-cats"
 
 scalaVersion := SCALA_VERSION
 scalaVersion in ThisBuild := SCALA_VERSION
@@ -34,7 +34,8 @@ def monocle = Seq(
 )
 
 def cats = Seq(
-  "org.typelevel" %% "cats-core" % CATS_VERSION
+  "org.typelevel" %% "cats-core" % CATS_VERSION,
+  "org.typelevel" %% "cats-free" % CATS_VERSION
 )
 
 // Code coverage
