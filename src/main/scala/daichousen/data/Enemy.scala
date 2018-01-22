@@ -1,4 +1,4 @@
-package daibouken.data
+package daichousen.data
 
 import java.util.UUID
 

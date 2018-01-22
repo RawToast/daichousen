@@ -1,4 +1,4 @@
-package daibouken.data
+package daichousen.data
 
 case class Equipment(weapon: Option[Weapon], armour: Option[Armour])
 

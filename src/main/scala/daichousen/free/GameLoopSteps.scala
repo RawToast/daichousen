@@ -1,4 +1,4 @@
-package daibouken.free
+package daichousen.free
 
 sealed trait GameLoopStep[T]
 
