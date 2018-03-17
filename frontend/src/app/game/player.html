@@ -1,0 +1,20 @@
+
+<div id="characterSheet" class="row">
+        <div class="row col-sm-12" style="padding: 2px 1em">
+            <div class="col-sm-2">{{player.name}}</div>
+            <div class="col-sm-2" >HP <span [class.hpwarn]="hpClass()">{{player.stats.currentHp}}</span> / {{player.stats.maxHp}}</div>
+            <div class="col-sm-2">Lv{{player.experience.level}} {{player.className}}</div>
+            <div class="col-sm-6">ST: {{statusMsg}}</div>
+        </div>
+    
+        <div class="row col-sm-12" style="padding: 2px 1em">
+            <div class="col-sm-2">STR: {{player.stats.strength}}</div>
+            <div class="col-sm-2">DEX: {{player.stats.dexterity}}</div>
+            <div class="col-sm-2">INT: {{player.stats.intellect}}</div>
+            <div class="col-sm-2">VIT: {{player.stats.vitality}}</div>
+            <div class="col-sm-2">SPD: {{player.stats.speed}}</div>
+            <div class="col-sm-2">GLD: {{player.gold}}</div>
+        </div>
+
+        <chousen-equipment class="row col-sm-12"></chousen-equipment>
+</div>
