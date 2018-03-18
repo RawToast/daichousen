@@ -30,7 +30,7 @@ class EquipmentActionHandlerSpec extends WordSpec {
 
       "State the action was used" in {
         assert(result.messages.size > startedGame.messages.size)
-        assert(result.messages.contains(GameMessage(s"${GameStateGenerator.playerName} equips Broadsword.")))
+        assert(result.messages.contains(GameMessage(s"${GameStateGenerator.playerName} equips Club.")))
       }
 
       "Reduce the player's position" in {

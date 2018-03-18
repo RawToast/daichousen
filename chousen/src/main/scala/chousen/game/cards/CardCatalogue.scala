@@ -178,7 +178,7 @@ object CardCatalogue extends Potions with PermanentEffects with Utility with Cam
     findersKeepers, findersKeepers,
     anotherTime,
 
-    club, ringmail, // 2 equip
+    club, ringmail, deceiver,// 2 equip
 
     armoury, restore, // 18 Card
     trade, trade,
