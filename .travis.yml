@@ -1,9 +1,28 @@
-language: scala
-jdk:
-  - oraclejdk8
-script:
-  - sbt clean test
-cache:
-  directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+matrix:
+  include:
+    - language: node_js
+      node_js:
+        - "8"
+      cache: npm
+      before_script:
+        - cd frontend
+        - npm install -g @angular/cli
+        - yarn
+      script:
+        - yarn build
+      
+    - language: scala
+      jdk: oraclejdk8
+      scala: 
+        - 2.12.4
+      cache:
+        directories:
+        - $HOME/.ivy2/cache
+        - $HOME/.sbt/boot/scala-$TRAVIS_SCALA_VERSION
+      before_script:
+        - cd chousen
+      script: 
+        - sbt validate
+      after_success:
+        - sbt coveralls
+      

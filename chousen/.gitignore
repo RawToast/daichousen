@@ -1,0 +1,5 @@
+target/
+project/target/
+dist/
+*.class
+.DS_Store
