@@ -8,6 +8,8 @@ matrix:
         - cd frontend
         - npm install -g @angular/cli
         - yarn
+      script:
+        - yarn build
       
     - language: scala
       jdk: oraclejdk8
@@ -21,4 +23,6 @@ matrix:
         - cd chousen
       script: 
         - sbt validate
+      after_success:
+        - sbt coveralls
       
