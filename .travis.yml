@@ -6,6 +6,7 @@ matrix:
       cache: npm
       before_script:
         - cd frontend
+        - npm install -g @angular/cli
       
     - language: scala
       jdk: oraclejdk8
