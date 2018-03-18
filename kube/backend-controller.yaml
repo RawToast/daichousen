@@ -14,7 +14,7 @@ spec:
         name: backend
     spec:
       containers:
-      - image: dokusho:server
+      - image: daichousen:server
         name: backend
         ports:
         - containerPort: 8080
