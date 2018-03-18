@@ -42,7 +42,7 @@ class GameStateOpsSpec extends WordSpec {
 
         val cards: Seq[Card] = Seq(CardCatalogue.pickACard, CardCatalogue.findersKeepers,
           CardCatalogue.anotherTime, CardCatalogue.essenceBoost, CardCatalogue.reduceRequirements,
-          CardCatalogue.greatSword, CardCatalogue.fireball)
+          CardCatalogue.club, CardCatalogue.fireball)
 
         val initialState = chousen.Optics.HandLens.set(cards)(gameState)
 

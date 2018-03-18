@@ -421,7 +421,7 @@ class GameStateManagerSpec extends WordSpec {
     "The player is already equipped" should {
       import chousen.Optics._
 
-      val shortsword = CardCatalogue.shortSword
+      val shortsword = CardCatalogue.manamune
 
       val club = CardCatalogue.club
       val swordId = club.id

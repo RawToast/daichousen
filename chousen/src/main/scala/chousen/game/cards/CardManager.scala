@@ -97,7 +97,8 @@ trait CardManager {
 
     val (hand, deck) = shuffledCards.splitAt(MAX_HAND_SIZE)
 
-    Cards(hand, deck, Seq.empty, passiveCards, EquippedCards(), Seq(CardCatalogue.makeAlkahest, CardCatalogue.troggsAnnilator).map(e => e.copy(treasure = true)))
+    Cards(hand, deck, Seq.empty, passiveCards, EquippedCards(), Seq(CardCatalogue.makeAlkahest, CardCatalogue.trollCrusher)
+      .map(e => e.copy(treasure = true)))
   }
 
   def moveCardToHand(cards: Cards, pred: Card => Boolean): Cards = {
@@ -168,7 +169,7 @@ trait CardManager {
     else cards.copy(hand = cards.hand :+ cards.treasure.head, treasure = cards.treasure.tail)
   }
 
-  def addCard(c: Card) = { cards: Cards =>
+  def addCard(c: Card): Cards => Cards = { cards: Cards =>
     cards.copy(hand = cards.hand :+ c)
   }
 }

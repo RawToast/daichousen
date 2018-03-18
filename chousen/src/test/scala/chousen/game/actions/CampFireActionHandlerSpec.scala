@@ -142,7 +142,7 @@ package chousen.game.actions
         val initialState: GameState = GameStateGenerator.gameStateWithFastPlayer
         val game: GameState = stateCreator.start(initialState)
 
-        val cardToDiscard = CardCatalogue.cape
+        val cardToDiscard = CardCatalogue.redCape
 
         val startedGame =
           DungeonLens

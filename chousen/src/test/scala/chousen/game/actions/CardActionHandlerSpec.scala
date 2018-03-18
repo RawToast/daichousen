@@ -105,7 +105,7 @@ class CardActionHandlerSpec extends WordSpec {
     }
 
     "Given Forge Weapon" should {
-      val weapon = Card(UUID.randomUUID(), "test", "test", SwordOfIntellect)
+      val weapon = Card(UUID.randomUUID(), "test", "test", Manamune)
       val basicCard = Card(UUID.randomUUID(), "test", "test", HealWounds)
 
       val startedGame: GameState =
@@ -134,7 +134,7 @@ class CardActionHandlerSpec extends WordSpec {
     }
 
     "Given Forge Armour" should {
-      val armourCard = Card(UUID.randomUUID(), "test", "test", Chainmail)
+      val armourCard = Card(UUID.randomUUID(), "test", "test", Ringmail)
       val basicCard = Card(UUID.randomUUID(), "test", "test", HealWounds)
 
       val startedGame: GameState = GenLens[GameState](_.cards.deck).modify(_ :+ armourCard)
@@ -339,7 +339,7 @@ class CardActionHandlerSpec extends WordSpec {
 
       val startedGame: GameState = HandLens.set(Seq(cardToDiscard))
         .andThen(DeckLens.modify(_ :+ builder.club))
-        .andThen(DeckLens.modify(_ :+ builder.chainmail))(game)
+        .andThen(DeckLens.modify(_ :+ builder.ringmail))(game)
 
       val result = CardActionHandler.handle(Armoury, None)(startedGame)
 
@@ -381,12 +381,11 @@ class CardActionHandlerSpec extends WordSpec {
       "Retain any ability cards" in {
         assert(result.cards.hand.exists(_.id == actionCard.id))
       }
-
     }
 
     "Given Reduce Requirements" should {
       val game: GameState = stateCreator.start(gameState)
-      val cardToAffect =  new chousen.game.cards.Equipment{}.heavyArmour
+      val cardToAffect =  new chousen.game.cards.Equipment{}.ringmail
 
       val startedGame: GameState = HandLens.set(Seq(cardToAffect))(game)
 
@@ -403,7 +402,6 @@ class CardActionHandlerSpec extends WordSpec {
       "Affect the requirements of the selected card" in {
         assert(result.cards.hand.find(_.id == cardToAffect.id).exists(c => c.requirements != cardToAffect.requirements))
       }
-
 
       "Lower the strength requirements of the selected card" in {
         val newCard = result.cards.hand.find(_.id == cardToAffect.id).getOrElse(cardToAffect)
