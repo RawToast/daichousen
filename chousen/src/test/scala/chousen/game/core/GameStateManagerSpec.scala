@@ -421,16 +421,15 @@ class GameStateManagerSpec extends WordSpec {
     "The player is already equipped" should {
       import chousen.Optics._
 
-      val shortsword = CardCatalogue.shortSword
-
       val club = CardCatalogue.club
-      val swordId = club.id
-      val request = EquipmentActionRequest(swordId, Club)
+
+      val clubId = club.id
+      val request = EquipmentActionRequest(clubId, Club)
 
 
       val initialState = GameStateOptics.HandLens.modify(_ :+ club)
-        .andThen(PlayerLens.composeLens(PlayerWeaponLens).set(Option(Weapon(shortsword.id, "Broadsword", 10))))
-        .andThen(EquipmentLens.set(EquippedCards(Option(shortsword))))(gameState)
+        .andThen(PlayerLens.composeLens(PlayerWeaponLens).set(Option(Weapon(club.id, "Broadsword", 10))))
+        .andThen(EquipmentLens.set(EquippedCards(Option(club))))(gameState)
 
       lazy val result = gameStateManager.useCard(club, request, initialState)
 
@@ -439,8 +438,8 @@ class GameStateManagerSpec extends WordSpec {
       }
 
       "Place the old item in the Player's hand" in {
-        assert(!initialState.cards.hand.contains(shortsword))
-        assert(result.cards.hand.contains(shortsword))
+        assert(!initialState.cards.hand.contains(club))
+        assert(result.cards.hand.contains(club))
       }
     }
   }

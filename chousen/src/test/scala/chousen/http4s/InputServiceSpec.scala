@@ -24,7 +24,7 @@ class InputServiceSpec extends WordSpec {
     val gameCreator = new RandomGameStateCreator(dungeonBuilder)
 
     val chainmailCardId = "12224f23-d5aa-4026-a229-56b881479714"
-    val chainmailCard = Card(UUID.fromString(chainmailCardId), "Chainmail",  "test", Chainmail)
+    val chainmailCard = Card(UUID.fromString(chainmailCardId), "Chainmail",  "test", Ringmail)
 
     val game = gameCreator.create("Bobby")
 
@@ -92,7 +92,7 @@ class InputServiceSpec extends WordSpec {
       implicit val enc: EntityEncoder[EquipmentActionRequest] = jsonEncoderOf[EquipmentActionRequest]
 
       "When given an valid equipment request" should {
-        val actionRequest = EquipmentActionRequest(UUID.fromString(chainmailCardId), Chainmail)
+        val actionRequest = EquipmentActionRequest(UUID.fromString(chainmailCardId), RedCape)
 
         val ent: Entity = enc.toEntity(actionRequest).unsafeRun()
         val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
@@ -115,7 +115,7 @@ class InputServiceSpec extends WordSpec {
 
       "When given an invalid Card ID" should {
         val altId = UUID.randomUUID()
-        val actionRequest = EquipmentActionRequest(altId, Chainmail)
+        val actionRequest = EquipmentActionRequest(altId, Ringmail)
 
         val ent: Entity = enc.toEntity(actionRequest).unsafeRun()
         val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)

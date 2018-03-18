@@ -3,6 +3,7 @@ package chousen.api.data
 import java.util.UUID
 
 import chousen.game.cards.{CardCatalogue, CardManager}
+import chousen.game.dungeon.BattleBuilder
 
 import scala.collection.LinearSeq
 
@@ -30,14 +31,12 @@ object GameStateGenerator {
   lazy val fireballCard = Card(UUID.fromString("403768ae-a336-4654-bebf-6920ff4d5eb8"), "Fireball", "Deals heavy damage to a single target", Fireball)
 
   private def gameStateWithPlayer(player:Player) = {
-    import cats.implicits.catsSyntaxSemigroup
-    import chousen.Implicits._
 
     val cs = CardManager.startGame(CardCatalogue.fighterDeck, CardCatalogue.passiveCards)
     def mkBattle(e: Enemy) = Battle(Set(e))
-    def createBattle = mkBattle(firstEnemy) |+| mkBattle(secondEnemy)
+    def createBattle = BattleBuilder() + firstEnemy + secondEnemy
 
-    val dungeon = Dungeon(createBattle, LinearSeq(mkBattle(firstEnemy), createBattle |+| createBattle))
+    val dungeon = Dungeon(createBattle.battle, LinearSeq(mkBattle(firstEnemy), createBattle.battle))
     val msgs = Seq.empty[GameMessage]
 
     val cards = cs.copy(hand = cs.hand.tail :+ CardCatalogue.essenceOfStrength)

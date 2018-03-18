@@ -14,7 +14,7 @@ spec:
         name: web
     spec:
       containers:
-      - image: chousen:frontend
+      - image: daichousen:frontend
         name: web
         ports:
         - containerPort: 80
