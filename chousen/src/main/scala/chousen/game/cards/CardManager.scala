@@ -97,7 +97,7 @@ trait CardManager {
 
     val (hand, deck) = shuffledCards.splitAt(MAX_HAND_SIZE)
 
-    Cards(hand, deck, Seq.empty, passiveCards, EquippedCards(), Seq(CardCatalogue.makeAlkahest, CardCatalogue.trollCrusher)
+    Cards(hand, deck, Seq.empty, passiveCards, EquippedCards(), Seq(CardCatalogue.essenceOfStrength, CardCatalogue.trollCrusher)
       .map(e => e.copy(treasure = true)))
   }
 

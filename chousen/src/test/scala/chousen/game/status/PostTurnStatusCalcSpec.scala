@@ -46,7 +46,7 @@ class PostTurnStatusCalcSpec extends WordSpec {
       }
 
       "Not heal when a CardAction is played" in {
-        lazy val cardResult = calc.applyStatusEffects(initialState, Miracle)
+        lazy val cardResult = calc.applyStatusEffects(initialState, Rummage)
 
         assert(cardResult.player.stats.currentHp == initialState.player.stats.currentHp)
       }

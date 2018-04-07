@@ -5,16 +5,16 @@ import java.util.UUID
 import chousen.Optics
 import chousen.Optics.HpLens
 import chousen.api.data._
-import chousen.game.core.turn.PositionCalculator.calculatePosition
 import chousen.game.core.GameStateOptics._
+import chousen.game.core.turn.PositionCalculator.calculatePosition
 import chousen.game.status.StatusBuilder
 
 class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
   def handle(targetId: Set[UUID], action: MultiAction): (GameState) => GameState = (gs: GameState) => {
 
-    val message = action.toString.head + ('A' to 'Z').foldLeft(action.toString.tail){case (str: String, c: Char) =>
-        str.replace(s"$c", s" $c")
+    val message = action.toString.head + ('A' to 'Z').foldLeft(action.toString.tail) { case (str: String, c: Char) =>
+      str.replace(s"$c", s" $c")
     }
 
     val targetMsg = GameMessage(s"${gs.player.name} uses $message!")
@@ -32,34 +32,15 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
     if (gsWithMessage == newState) gs
     else {
-
-      val finalState = if(action == Shatter)  {
-        PlayerLens.composeLens(PlayerOptics.PlayerHealthLens).set(1)
-          .andThen(MessagesLens.modify(msgs =>
-            msgs :+ GameMessage(s"${newState.player.name} is caught in the chaos and is left with 1 health!")))
-            .apply(newState)} else newState
-
       PlayerLens.modify(p => calculatePosition(p))
       .andThen(handleDead)
-      .apply(finalState)
+      .apply(newState)
     }
   }
 
   private def actions(action: MultiAction): (Player, Enemy, Seq[GameMessage]) => (Player, Option[Enemy], Seq[GameMessage]) = {
     action match {
-      case GroundStrike => groundStrike
-      case WindStrike => windStrike
       case Fireball => fireball
-      case PotionOfFlames => flames
-      case PotionOfPoison => poison
-      case PotionOfMiasma => miasma
-      case PotionOfQuagmire => quagmire
-      case PotionOfAlkahest => alkahest
-      case ScrollOfFear => fear
-      case Extinguish => extinguish
-      case Shatter => shatter
-      case MassDrain => massDrain
-      case Chrysopoeia => chrysopoeia
     }
   }
 
@@ -72,8 +53,8 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
     // This should be replaced by a generic attack/damage function
     val newE = EnemyOptics.EnemyStatsLens.composeLens(CharStatsOptics.HpLens).modify(hp => hp - dmg)
-      .andThen(EnemyOptics.EnemyPosition.modify(ep => ep - 10 - (sePlayer.stats.strength / 2)))
-      .apply(e)
+               .andThen(EnemyOptics.EnemyPosition.modify(ep => ep - 10 - (sePlayer.stats.strength / 2)))
+               .apply(e)
 
     (p, Option(newE), gameMessages)
   }
@@ -82,15 +63,15 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
     val dmg = dc.calculatePlayerDamage(p, e,
       Multipliers.builder
-        .dexMulti(Multipliers.medMulti)
-        .intMulti(Multipliers.lowMulti)
-        .maxMulti(Multipliers.multiTarget).m) + (dc.sc.calculate(p).stats.intellect / 4)
+      .dexMulti(Multipliers.medMulti)
+      .intMulti(Multipliers.lowMulti)
+      .maxMulti(Multipliers.multiTarget).m) + (dc.sc.calculate(p).stats.intellect / 4)
 
     val gameMessages = msgs :+ GameMessage(s"${e.name} is struck and takes $dmg damage.")
 
     // This should be replaced by a generic attack/damage function
     val newE = EnemyOptics.EnemyStatsLens.composeLens(CharStatsOptics.HpLens)
-      .modify(hp => hp - dmg)(e)
+               .modify(hp => hp - dmg)(e)
 
     (p, Option(newE), gameMessages)
   }
@@ -105,7 +86,7 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
     val gameMessages = msgs :+ GameMessage(s"${e.name} is engulfed by flames and takes $dmg damage.")
 
     val newE = EnemyOptics.EnemyStatsLens.composeLens(CharStatsOptics.HpLens).modify(hp => hp - dmg)
-      .andThen(EnemyOptics.EnemyStatusLens.modify(_ :+ StatusBuilder.makeBurn(sePlayer.stats.intellect / 8)))(e)
+               .andThen(EnemyOptics.EnemyStatusLens.modify(_ :+ StatusBuilder.makeBurn(sePlayer.stats.intellect / 8)))(e)
 
     (p, Option(newE), gameMessages)
   }
@@ -119,7 +100,7 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
     // This should be replaced by a generic attack/damage function
     val newE = EnemyOptics.EnemyStatsLens.composeLens(CharStatsOptics.HpLens)
-      .modify(hp => hp - dmg)(e)
+               .modify(hp => hp - dmg)(e)
 
     (p, Option(newE), gameMessages)
   }
@@ -127,13 +108,13 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
   def massDrain(p: Player, e: Enemy, msgs: Seq[GameMessage]) = {
     val dmg = dc.calculatePlayerMagicDamage(p, e,
       Multipliers.builder.intMulti(Multipliers.lowMulti)
-        .maxMulti(Multipliers.multiTarget).m) + (e.stats.maxHp / 12)
+      .maxMulti(Multipliers.multiTarget).m) + (e.stats.maxHp / 12)
 
     val dmgMsg = GameMessage(s"${p.name} drains $dmg health from ${e.name}!")
 
     // This should be replaced by a generic attack/damage function
     val newEnemy = EnemyOptics.EnemyStatsLens.composeLens(HpLens)
-      .modify(hp => hp - dmg)(e)
+                   .modify(hp => hp - dmg)(e)
 
     val newPlayer = PlayerOptics.PlayerHealthLens.modify(hp => Math.min(hp + dmg, p.stats.maxHp))(p)
     val gameMessages = msgs :+ dmgMsg
@@ -151,13 +132,13 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
       val dmg = Math.max(1, magicDmg + (missingHp / 3)) +
         e.status.filter(_.effect == Burn)
-          .map(e => e.amount.map(_ * e.turns).getOrElse(0))
-          .sum
+        .map(e => e.amount.map(_ * e.turns).getOrElse(0))
+        .sum
 
       val gameMessages = msgs :+ GameMessage(s"${e.name} is magically extinguished and takes $dmg damage.")
 
       val newE = EnemyOptics.EnemyStatsLens.composeLens(CharStatsOptics.HpLens).modify(hp => hp - dmg)
-        .andThen(EnemyOptics.EnemyStatusLens.modify(_.filterNot(_.effect == Burn)))(e)
+                 .andThen(EnemyOptics.EnemyStatusLens.modify(_.filterNot(_.effect == Burn)))(e)
 
       (p, Option(newE), gameMessages)
     }
@@ -190,7 +171,7 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
   def alkahest(p: Player, e: Enemy, msgs: Seq[GameMessage]) = {
     val newE = EnemyOptics.EnemyStatusLens
-      .modify(_ :+ StatusBuilder.makePoison(5 + p.experience.level + (e.stats.maxHp / 12), turns = 7))(e)
+               .modify(_ :+ StatusBuilder.makePoison(5 + p.experience.level + (e.stats.maxHp / 12), turns = 7))(e)
 
     (p, Option(newE), msgs)
   }
@@ -199,9 +180,9 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
     val gameMessages = msgs :+ GameMessage(s"${e.name} is burnt by the toxic flames.")
 
     val newE = EnemyOptics.EnemyStatusLens
-      .modify(_ :+ StatusBuilder.makeBurn(10, turns = 5)
-        :+ StatusBuilder.makePoison(10, turns = 5)
-        :+ StatusBuilder.makeSlow(1, turns = 2))(e)
+               .modify(_ :+ StatusBuilder.makeBurn(10, turns = 5)
+                 :+ StatusBuilder.makePoison(10, turns = 5)
+                 :+ StatusBuilder.makeSlow(1, turns = 2))(e)
 
     (p, Option(newE), gameMessages)
   }
@@ -223,15 +204,15 @@ class MultiTargetActionHandler(dc: DamageCalculator) extends ActionHandler {
 
     val poisonBoost = if (e.status.exists(_.effect == Poison)) 10 else 0
 
-    val score = (sePlayer.stats.intellect * 2 ) + poisonBoost + p.experience.level - e.stats.currentHp
+    val score = (sePlayer.stats.intellect * 2) + poisonBoost + p.experience.level - e.stats.currentHp
     lazy val goldCoins = Math.max(1, score / 3)
 
     if (score >= 0) {
       val newEnemy = Optics.EnemyHpLens.set(-7)(e)
       (p.copy(gold = p.gold + goldCoins), Option(newEnemy), msgs :+ GameMessage(s"${e.name} is transmuted into $goldCoins gold pieces"))
-    } else if(score < 0 && score >= -10) {
+    } else if (score < 0 && score >= -10) {
       (p, Option(e), msgs :+ GameMessage(s"${e.name} struggles to resist"))
-    } else if(score < -10 && score > -30){
+    } else if (score < -10 && score > -30) {
       (p, Option(e), msgs :+ GameMessage(s"${e.name} resists"))
     } else {
       (p, Option(e), msgs :+ GameMessage(s"${e.name} resists with ease"))

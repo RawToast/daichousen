@@ -36,14 +36,7 @@ class RandomGameStateCreator(dungeonBuilder: DungeonBuilder) extends GameStateCr
     }
 
     val deck = choice match {
-      case 1 => CC.fighterDeck
-      case 2 => CC.berserkerDeck
-      case 3 => CC.chieftainDeck
-      case 4 => CC.rogueDeck
-      case 5 => CC.tricksterDeck
-      case 6 => CC.mage
-      case 7 => CC.wizard
-      case _ => CC.alchemist
+      case _ => CC.fighterDeck
     }
 
     val cards: Cards = CardManager.startGame(deck, CC.passiveCards)

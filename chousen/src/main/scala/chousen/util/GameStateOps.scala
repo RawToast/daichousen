@@ -53,38 +53,12 @@ trait GameResponseGenerator {
           ca match {
             case action: DiscardCardAction =>
               action match {
-                case ReduceRequirements => gs.cards.hand
-                  .filter(r => r.requirements.str.nonEmpty || r.requirements.dex.nonEmpty || r.requirements.int.nonEmpty)
-                  .map(h => ActionRequestBody(h.name, Some(card.action), cardId = Option(h.id)))
-                case IncreaseCharges =>
-                  gs.cards.hand
-                    .filter(_.charges.nonEmpty)
-                    .map(h => ActionRequestBody(h.name, Some(card.action), cardId = Option(h.id))) ++
-                    gs.cards.equippedCards.skills
-                      .filter(_.charges.nonEmpty)
-                      .map(h => ActionRequestBody(h.name, Some(card.action), cardId = Option(h.id)))
                 case _ => gs.cards.hand
-                  .filter(_.id != card.id)
-                  .map(h => ActionRequestBody(h.name, Some(card.action), cardId = Option(h.id)))
+                          .filter(_.id != card.id)
+                          .map(h => ActionRequestBody(h.name, Some(card.action), cardId = Option(h.id)))
               }
             case std: StandardCardAction =>
               std match {
-                case AnotherTime => gs.cards.discard
-                  .foldLeft(Seq.empty[Card])((cs, c) => if (cs.exists(_.action == c.action)) cs else cs :+ c)
-                  .map(c => ActionRequestBody(c.name, Some(card.action), cardId = Option(c.id)))
-                case FindersKeepers => gs.cards.deck
-                  .foldLeft(Seq.empty[Card])((cs, c) =>
-                    if (cs.exists(_.action == c.action)) cs
-                    else if (!(c.action.isInstanceOf[CardAction] || c.action.isInstanceOf[EquipAction])) cs :+ c
-                    else cs).sortBy(_.name)
-                  .map(c => ActionRequestBody(c.name, Some(card.action), cardId = Option(c.id)))
-
-                case PickACard => gs.cards.deck
-                  .foldLeft(Seq.empty[Card])((cs, c) =>
-                    if (cs.exists(_.action == c.action)) cs
-                    else if (c.action.isInstanceOf[CardAction]) cs :+ c
-                    else cs).sortBy(_.name)
-                  .map(c => ActionRequestBody(c.name, Some(card.action), cardId = Option(c.id)))
                 case _ => Seq(ActionRequestBody(card.name, Some(card.action)))
               }
           })
@@ -103,9 +77,9 @@ trait GameResponseGenerator {
 
     val newHand = gs.cards.hand.map(toCardResponse)
     val newDeck = gs.cards.deck.map(toShortCardResponse)
-      .foldLeft(Seq.empty[ShortCardResponse])((cs, cr) => if (!cs.exists(_.name == cr.name)) cs :+ cr else cs)
+                  .foldLeft(Seq.empty[ShortCardResponse])((cs, cr) => if (!cs.exists(_.name == cr.name)) cs :+ cr else cs)
     val newDiscard = gs.cards.discard.map(toShortCardResponse)
-      .foldLeft(Seq.empty[ShortCardResponse])((cs, cr) => if (!cs.exists(_.name == cr.name)) cs :+ cr else cs)
+                     .foldLeft(Seq.empty[ShortCardResponse])((cs, cr) => if (!cs.exists(_.name == cr.name)) cs :+ cr else cs)
 
     val weaponResp = gs.cards.equippedCards.weapon.map(toCardResponse)
     val armourResp = gs.cards.equippedCards.armour.map(toCardResponse)
@@ -117,30 +91,30 @@ trait GameResponseGenerator {
     val blockReq = ActionRequest("Block", "Block for one turn, greatly increasing defense", s"game/${gs.uuid}/block", Seq(ActionRequestBody("Block")))
     val actions: Seq[ActionRequest] = if (gs.dungeon.currentEncounter.enemies.forall(_.name == "Camp Fire")) {
       gs.cards.passive
-        .withFilter(_.action.isInstanceOf[CampFireAction])
-        .map(p => p.action.asInstanceOf[CampFireAction] match {
-          case dcfa: DiscardingCampFireAction =>
+      .withFilter(_.action.isInstanceOf[CampFireAction])
+      .map(p => p.action.asInstanceOf[CampFireAction] match {
+        case dcfa: DiscardingCampFireAction =>
 
-            def learnFilter(c: Card): Boolean = c.charges.nonEmpty || p.action != LearnSkill
+          def learnFilter(c: Card): Boolean = c.charges.nonEmpty || p.action != LearnSkill
 
-            val requirements = for {
-              c <- gs.cards.hand.filter(learnFilter)
-              cid = Option(c.id)
-              req = ActionRequestBody(c.name, Option(p.action.asInstanceOf[CampFireAction]), cardId = cid)
-            } yield req
+          val requirements = for {
+            c <- gs.cards.hand.filter(learnFilter)
+            cid = Option(c.id)
+            req = ActionRequestBody(c.name, Option(p.action.asInstanceOf[CampFireAction]), cardId = cid)
+          } yield req
 
-            ActionRequest(p.name, p.description, s"game/${gs.uuid}/camp/${p.id}", requirements)
-          case _: CampFireAction =>
-            ActionRequest(p.name, p.description, s"game/${gs.uuid}/camp/${p.id}",
-              Seq(ActionRequestBody(p.name, Option(p.action.asInstanceOf[CampFireAction]))))
-        }) :+ blockReq
+          ActionRequest(p.name, p.description, s"game/${gs.uuid}/camp/${p.id}", requirements)
+        case _: CampFireAction =>
+          ActionRequest(p.name, p.description, s"game/${gs.uuid}/camp/${p.id}",
+            Seq(ActionRequestBody(p.name, Option(p.action.asInstanceOf[CampFireAction]))))
+      }) :+ blockReq
     } else {
       gs.dungeon.currentEncounter.enemies
-        .map(e => ActionRequest(s"Attack ${e.name}",
-          s"Use a basic attack on ${e.name}",
-          s"game/${gs.uuid}/attack",
-          Seq(ActionRequestBody(s"Attack ${e.name}", targetId = Some(e.id)))))
-        .toSeq :+ blockReq
+      .map(e => ActionRequest(s"Attack ${e.name}",
+        s"Use a basic attack on ${e.name}",
+        s"game/${gs.uuid}/attack",
+        Seq(ActionRequestBody(s"Attack ${e.name}", targetId = Some(e.id)))))
+      .toSeq :+ blockReq
     }
 
     def hasTurn(gm: GameMessage) = gm.text.contains(" turn.")
