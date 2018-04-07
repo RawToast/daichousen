@@ -40,8 +40,8 @@ class GameStateOpsSpec extends WordSpec {
 
       "Handle complex cards" in {
 
-        val cards: Seq[Card] = Seq(CardCatalogue.pickACard, CardCatalogue.findersKeepers,
-          CardCatalogue.anotherTime, CardCatalogue.essenceBoost, CardCatalogue.reduceRequirements,
+        val cards: Seq[Card] = Seq(
+//          CardCatalogue.anotherTime, CardCatalogue.essenceBoost, CardCatalogue.reduceRequirements,
           CardCatalogue.club, CardCatalogue.fireball)
 
         val initialState = chousen.Optics.HandLens.set(cards)(gameState)
@@ -74,7 +74,3 @@ class GameStateOpsSpec extends WordSpec {
     }
   }
 }
-
-// case class GameState(uuid: UUID, player: Player, cards: Cards, dungeon: Dungeon, messages: Seq[GameMessage])
-//case class Cards(hand: Seq[Card], deck: Seq[Card], discard: Seq[Card], passive: Seq[Card], equippedCards: EquippedCards, playedEssence:Boolean=false)
-//case class Card(id: UUID, name: String, description: String, action: Action, charges: Option[Int]=None, maxCharges:Option[Int]=None, requirements: Requirements=Requirements())

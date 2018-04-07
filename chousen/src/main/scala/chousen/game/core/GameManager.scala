@@ -96,10 +96,10 @@ class GameStateManager(damageCalculator: DamageCalculator, postStatusCalc: PostT
     val newState = command match {
       case AttackRequest(targetId) =>
         val newState = GameTurnLoop.takeTurn(game, basicAttack.attack(targetId))
-        transition(newState, QuickAttack)
+        transition(newState, Rummage)
       case BlockRequest() =>
         val newState = GameTurnLoop.takeTurn(game, blockHandler.block())
-        transition(newState, QuickAttack) //Rather hacky, need something else
+        transition(newState, Rummage) //Rather hacky, need something else
       case SelfInflictingActionRequest(a) =>
         val resetEssences = !essenceActions.contains(a)
         val ns = GameTurnLoop.takeTurn(game,

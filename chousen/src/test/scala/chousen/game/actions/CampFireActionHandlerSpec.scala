@@ -231,7 +231,7 @@ package chousen.game.actions
 
         val game: GameState = stateCreator.start(initialState)
 
-        val cardToDiscard = CardCatalogue.bankruptcy
+        val cardToDiscard = CardCatalogue.fireball
 
         val startedGame =
           DungeonLens
