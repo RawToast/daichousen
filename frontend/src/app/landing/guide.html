@@ -1,0 +1,65 @@
+<h6 (click)="toggleGuide()">Guide</h6>
+
+<div id="notes" class="c-notes" *ngIf="showGuide">
+    
+    <div class="pre-scrollable">
+        <pre class="c-messages">
+    Daichousen is a the successor to Chousen -- a hybrid card game / turn-based dungeon crawler.
+
+    As development is still in early experimental stages, do not expect these notes to reflect reality.
+    
+    Class Choice
+    =============
+
+    The player's class determines their starting stats and their deck.
+
+    Adventurer
+    Balanced deck with a mixture of abilities.
+
+
+    Stats
+    =====
+
+    Strength - 
+    Dexterity - 
+    Intellect - 
+    Vitality - 
+
+    Stronger items tend to have stat requirements; although, they can be lowered
+    by various means.
+
+    Charges
+    =========
+
+    Some cards are limited to a number of charges. Once all the charges
+    are used the card is discarded.
+
+    Essences
+    =========
+
+    Essence cards increase stats. Only one essence card may be played before you
+    take an action. Playing an essence is instant and does not take a turn.
+
+    Campfires
+    =========
+
+    Throughout the dungeon the player will find a number of campfires. These
+    should be used as places to rest and refresh their hand.
+
+    At a campfire the player may Rest or choose to draw additional cards.
+
+    Gold
+    ====
+
+    The player collects gold when defeating enemies and sometimes from cards.
+
+    Some abilities and cards cost gold to use. Otherwise gold just contributes
+    to the player's score.
+
+    Treasure deck
+    =============
+    
+    After winning an encounter the player gets to draw a single card from the
+    treasure deck. This deck currently contains a random selection of good cards.
+    </pre>
+</div>
