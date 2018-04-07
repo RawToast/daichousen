@@ -20,6 +20,7 @@ import { CardsComponent } from './game/cards';
 import { GameResponse } from './game/gameresponse';
 import { GuideComponent } from './landing/guide';
 import { SkillsComponent } from './game/skills';
+import { provideRoutes} from '@angular/router';
 
 @NgModule({
   declarations: [
