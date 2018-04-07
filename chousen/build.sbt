@@ -57,8 +57,8 @@ def circe = Seq(
 
 
 def monocle = Seq(
-  "com.github.julien-truffaut" %% "monocle-core" % "1.4.0",
-  "com.github.julien-truffaut" %%  "monocle-macro" % "1.4.0"
+  "com.github.julien-truffaut" %% "monocle-core" % "1.5.1-cats",
+  "com.github.julien-truffaut" %%  "monocle-macro" % "1.5.0-cats"
 )
 
 // Code coverage
