@@ -1,9 +1,9 @@
 import NativePackagerKeys._
 import sbt.Keys.libraryDependencies
 
-name := "chousen-server"
+name := "daichousen-server"
 
-version := "0.5.0-SNAPSHOT"
+version := "0.6.0"
 
 
 mainClass in(Compile, run) := Some("chousen.Http4sServer")
@@ -12,9 +12,9 @@ parallelExecution in Test:= false
 enablePlugins(JavaAppPackaging)
 
 
-val SCALA_VERSION = "2.12.4"
-val HTTP4S_VERSION = "0.17.0"
-val CIRCE_VERSION = "0.8.0"
+val SCALA_VERSION = "2.12.5"
+val HTTP4S_VERSION = "0.18.7"
+val CIRCE_VERSION = "0.9.3"
 
 scalaVersion := SCALA_VERSION
 scalaVersion in ThisBuild := SCALA_VERSION
@@ -27,6 +27,8 @@ resolvers ++= Seq(
 
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.1"
 libraryDependencies += "com.google.api-client" % "google-api-client" % "1.22.0"
+libraryDependencies += "org.typelevel" %% "cats-effect" % "0.10"
+
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % Test
 libraryDependencies += "org.mockito" % "mockito-core" % "2.9.0" % Test
 
@@ -73,7 +75,7 @@ val compilerOptions = Seq(
   "-language:_",
   "-unchecked",
   "-Xlint:-unused",
-  "-Xfatal-warnings",
+//  "-Xfatal-warnings",
   "-Xfuture",
   "-Yno-adapted-args",
   "-Ywarn-numeric-widen",

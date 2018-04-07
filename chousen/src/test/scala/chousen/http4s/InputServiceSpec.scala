@@ -2,6 +2,8 @@ package chousen.http4s
 
 import java.util.UUID
 
+import cats.data.OptionT
+import cats.effect.IO
 import chousen.Optics._
 import chousen.api.core.{GameAccess, Http4sMappedGameAccess}
 import chousen.api.data._
@@ -9,14 +11,16 @@ import chousen.game.actions.DamageCalculator
 import chousen.game.core.{GameManager, GameStateManager, RandomGameStateCreator}
 import chousen.game.dungeon.{DungeonBuilder, SimpleDungeonBuilder}
 import chousen.game.status.{PostTurnStatusCalculator, StatusCalculator}
-import fs2.Task
 import io.circe.Encoder
 import io.circe.generic.auto._
-import org.http4s.{Entity, EntityEncoder, MaybeResponse, Method, Request, Response, Uri}
+import org.http4s.dsl.io._
 import org.http4s.circe._
+import org.http4s.{Entity, EntityEncoder, Method, Request, Response, Uri}
 import org.scalatest.WordSpec
 
 class InputServiceSpec extends WordSpec {
+
+  val notFound = Response[IO](status = NotFound)
 
   "InputServiceSpec" when {
 
@@ -31,7 +35,7 @@ class InputServiceSpec extends WordSpec {
     val bobby = HandLens.modify(_ :+ chainmailCard)(game)
 
     val gameMap = Map(bobby.uuid -> bobby)
-    val gameAccess: GameAccess[Task, Response] = new Http4sMappedGameAccess(gameMap)
+    val gameAccess: GameAccess[IO, Response[IO]] = new Http4sMappedGameAccess(gameMap)
 
     val statusCalculator = new StatusCalculator
     val damageCalculator = new DamageCalculator(statusCalculator)
@@ -45,15 +49,17 @@ class InputServiceSpec extends WordSpec {
     "Handling a Basic Attack request" should {
 
       val attack = AttackRequest(bobby.dungeon.currentEncounter.enemies.head.id)
-      implicit val enc: EntityEncoder[AttackRequest] = jsonEncoderOf[AttackRequest]
+      implicit val enc: EntityEncoder[IO, AttackRequest] = jsonEncoderOf[IO, AttackRequest]
 
-      val ent: Entity = enc.toEntity(attack).unsafeRun()
-      val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
-      val req: Request = Request(method = Method.POST, uri = Uri.unsafeFromString(s"/game/${bobby.uuid}/attack"),
+      val ent: Entity[IO] = enc.toEntity(attack).unsafeRunSync()
+      val callService2: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
+      val req: Request[IO] = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"/game/${bobby.uuid}/attack"),
         body = ent.body)
-      val task: Task[MaybeResponse] = callService(req)
+      val task: OptionT[IO, Response[IO]] = callService2(req)
 
-      lazy val result: Response = task.unsafeRun().orNotFound
+
+      lazy val result: Response[IO] = task.value.unsafeRunSync().getOrElse(notFound)
+
 
       "Return successfully" in {
         assert(result.status.responseClass.isSuccess)
@@ -67,15 +73,14 @@ class InputServiceSpec extends WordSpec {
     "Handling a Block request" should {
 
       val attack = BlockRequest()
-      implicit val enc: EntityEncoder[BlockRequest] = jsonEncoderOf[BlockRequest]
+      implicit val enc: EntityEncoder[IO, BlockRequest] = jsonEncoderOf[IO, BlockRequest]
 
-      val ent: Entity = enc.toEntity(attack).unsafeRun()
-      val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
-      val req: Request = Request(method = Method.POST, uri = Uri.unsafeFromString(s"/game/${bobby.uuid}/block"),
+      val ent: Entity[IO] = enc.toEntity(attack).unsafeRunSync()
+      val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
+      val req: Request[IO] = Request[IO](method = Method.POST, uri = Uri.unsafeFromString(s"/game/${bobby.uuid}/block"),
         body = ent.body)
-      val task: Task[MaybeResponse] = callService(req)
 
-      lazy val result: Response = task.unsafeRun().orNotFound
+      lazy val result = callService(req).getOrElse(notFound).unsafeRunSync()
 
       "Return successfully" in {
         assert(result.status.responseClass.isSuccess)
@@ -89,20 +94,20 @@ class InputServiceSpec extends WordSpec {
     "Handling an Equipment request" when {
       import io.circe.generic.extras.semiauto.deriveEnumerationEncoder
       implicit val enumDecoder: Encoder[EquipAction] = deriveEnumerationEncoder[EquipAction]
-      implicit val enc: EntityEncoder[EquipmentActionRequest] = jsonEncoderOf[EquipmentActionRequest]
+      implicit val enc: EntityEncoder[IO, EquipmentActionRequest] = jsonEncoderOf[IO, EquipmentActionRequest]
 
       "When given an valid equipment request" should {
         val actionRequest = EquipmentActionRequest(UUID.fromString(chainmailCardId), RedCape)
 
-        val ent: Entity = enc.toEntity(actionRequest).unsafeRun()
-        val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
+        val ent: Entity[IO] = enc.toEntity(actionRequest).unsafeRunSync()
+        val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
 
-        val req: Request = Request(method = Method.POST,
+        val req: Request[IO] = Request[IO](method = Method.POST,
           uri = Uri.unsafeFromString(s"/game/${bobby.uuid}/equip/$chainmailCardId"),
           body = ent.body)
-        val task: Task[MaybeResponse] = callService(req)
+        val task: IO[Response[IO]] = callService(req).getOrElse(notFound)
 
-        lazy val result: Response = task.unsafeRun().orNotFound
+        lazy val result: Response[IO] = task.unsafeRunSync()
 
         "Return successfully" in {
           assert(result.status.responseClass.isSuccess)
@@ -117,15 +122,14 @@ class InputServiceSpec extends WordSpec {
         val altId = UUID.randomUUID()
         val actionRequest = EquipmentActionRequest(altId, Ringmail)
 
-        val ent: Entity = enc.toEntity(actionRequest).unsafeRun()
-        val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
+        val ent: Entity[IO] = enc.toEntity(actionRequest).unsafeRunSync()
+        val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
 
-        val req: Request = Request(method = Method.POST,
+        val req: Request[IO] = Request[IO](method = Method.POST,
           uri = Uri.unsafeFromString(s"/game/${bobby.uuid}/equip/$altId"),
           body = ent.body)
-        val task: Task[MaybeResponse] = callService(req)
 
-        lazy val result: Response = task.unsafeRun().orNotFound
+        lazy val result: Response[IO] = callService(req).getOrElse(notFound).unsafeRunSync()
 
         "Return unsuccessfully" in {
           assert(!result.status.responseClass.isSuccess)

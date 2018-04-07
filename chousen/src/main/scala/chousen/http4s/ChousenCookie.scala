@@ -1,5 +1,6 @@
 package chousen.http4s
 
+import cats.effect.IO
 import org.http4s
 import org.http4s.headers.Cookie
 
@@ -7,7 +8,7 @@ trait ChousenCookie {
   import org.http4s.Request
   def findChousenCookie(c: Cookie): Option[http4s.Cookie] = c.values.find(_.name == "chousen")
 
-  implicit class TokenSyntax(req: Request) {
+  implicit class TokenSyntax(req: Request[IO]) {
 
     def requestToken: Option[String] = for {
       headers <- req.headers.get(Cookie)

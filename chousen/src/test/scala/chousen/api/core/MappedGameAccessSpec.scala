@@ -1,8 +1,9 @@
 package chousen.api.core
 
+import cats.effect.IO
 import chousen.api.data.{GameState, GameStateGenerator}
-import fs2.Task
-import org.http4s.dsl._
+import io.circe.Json
+import org.http4s.dsl.io._
 import org.scalatest.WordSpec
 
 class MappedGameAccessSpec extends WordSpec {
@@ -15,6 +16,7 @@ class MappedGameAccessSpec extends WordSpec {
     import io.circe.syntax._
 
     val mappedGameAccess = new Http4sMappedGameAccess()
+    implicit val decoder: EntityDecoder[IO, Json] = jsonOf[IO, Json]
 
     val gameState: GameState = GameStateGenerator.staticGameState
 
@@ -22,12 +24,13 @@ class MappedGameAccessSpec extends WordSpec {
 
     "Return a game with the given id" in {
 
-      val resultTask: Task[Response] = mappedGameAccess.withGame(GameStateGenerator.uuid)(x => Ok(x.asJson))
+      val resultTask: IO[Response[IO]] = mappedGameAccess.withGame(GameStateGenerator.uuid)(x => Ok(x.asJson))
 
-      val result = resultTask.unsafeRun()
+      val result = resultTask.unsafeRunSync()
 
       assert(result.status.code == 200)
-      val gameState = result.as(jsonOf[GameState]).unsafeRun()
+      implicit val decoder: EntityDecoder[IO, GameState] = jsonOf[IO, GameState]
+      val gameState = result.as[GameState].unsafeRunSync()
 
       assert(gameState.player.name == "Test Player")
       assert(gameState.uuid == GameStateGenerator.uuid)
@@ -38,10 +41,9 @@ class MappedGameAccessSpec extends WordSpec {
       val uuidString = "a0127253-cdda-48b8-a843-61d450364abf"
       val emptyId = java.util.UUID.fromString(uuidString)
 
-      val result = mappedGameAccess.withGame(emptyId)(x => Ok(x.asJson)).unsafeRun()
+      val result = mappedGameAccess.withGame(emptyId)(x => Ok(x.asJson)).unsafeRunSync()
 
       assert(result.status.code == 404)
     }
-
   }
 }

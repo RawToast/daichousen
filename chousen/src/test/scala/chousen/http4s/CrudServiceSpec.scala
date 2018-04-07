@@ -1,14 +1,18 @@
 package chousen.http4s
 
+import cats.data.OptionT
+import cats.effect.IO
 import chousen.api.core.{GameAccess, Http4sMappedGameAccess}
 import chousen.game.core.RandomGameStateCreator
 import chousen.game.dungeon.{DungeonBuilder, SimpleDungeonBuilder}
 import chousen.game.status.StatusCalculator
-import fs2.Task
-import org.http4s.{MaybeResponse, Request, Response, Method, Uri}
+import org.http4s.{Method, Request, Response, Uri}
+import org.http4s.dsl.io.NotFound
 import org.scalatest.WordSpec
 
 class CrudServiceSpec extends WordSpec {
+
+  val notFound: Response[IO] = Response[IO](status = NotFound)
 
   "CrudService" when {
 
@@ -17,7 +21,7 @@ class CrudServiceSpec extends WordSpec {
 
     val bobby = gameCreator.create("Bobby")
     val gameMap = Map(bobby.uuid -> bobby)
-    val gameAccess: GameAccess[Task, Response] = new Http4sMappedGameAccess(gameMap)
+    val gameAccess: GameAccess[IO, Response[IO]] = new Http4sMappedGameAccess(gameMap)
 
     val sc = new StatusCalculator
     val service = new CrudService(gameAccess, gameCreator, sc)
@@ -25,11 +29,11 @@ class CrudServiceSpec extends WordSpec {
 
     "Creating a game" should {
 
-      val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
-      val req: Request = Request(method = Method.POST, uri = Uri.unsafeFromString("/game/david/start"))
-      val task: Task[MaybeResponse] = callService(req)
+      val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
+      val req: Request[IO] = Request[IO](method = Method.POST, uri = Uri.unsafeFromString("/game/david/start"))
+      val task: OptionT[IO, Response[IO]] = callService(req)
 
-      lazy val result: Response = task.unsafeRun().orNotFound
+      lazy val result: Response[IO] = task.value.unsafeRunSync().getOrElse(notFound)
 
       "Return successfully" in {
         assert(result.status.responseClass.isSuccess)
@@ -43,11 +47,11 @@ class CrudServiceSpec extends WordSpec {
 
     "Creating a game with a choice" should {
 
-      val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
-      val req: Request = Request(method = Method.POST, uri = Uri.unsafeFromString("/game/david/start/1"))
-      val task: Task[MaybeResponse] = callService(req)
+      val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
+      val req: Request[IO] = Request(method = Method.POST, uri = Uri.unsafeFromString("/game/david/start/1"))
+      val task = callService(req)
 
-      lazy val result: Response = task.unsafeRun().orNotFound
+      lazy val result = task.value.unsafeRunSync().getOrElse(notFound)
 
       "Return successfully" in {
         assert(result.status.responseClass.isSuccess)
@@ -62,12 +66,12 @@ class CrudServiceSpec extends WordSpec {
 
     "Loading a game that does not exist" should {
 
-      val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
-      val req: Request = Request(method = Method.GET, uri =
+      val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
+      val req: Request[IO] = Request[IO](method = Method.GET, uri =
         Uri.unsafeFromString("/game/33673169-266e-417e-a78d-55ba0e2b493c"))
-      val task: Task[MaybeResponse] = callService(req)
+      val task  = callService(req)
 
-      lazy val result: Response = task.unsafeRun().orNotFound
+      lazy val result: Response[IO] = task.value.unsafeRunSync().getOrElse(notFound)
 
       "Return a 404" in {
         assert(!result.status.responseClass.isSuccess)
@@ -77,12 +81,12 @@ class CrudServiceSpec extends WordSpec {
 
     "Loading a game that exists" should {
 
-      val callService: (Request) => Task[MaybeResponse] = service.routes.apply(_: Request)
-      val req: Request = Request(method = Method.GET, uri =
+      val callService: Request[IO] => OptionT[IO, Response[IO]] = service.routes.apply(_: Request[IO])
+      val req: Request[IO] = Request[IO](method = Method.GET, uri =
         Uri.unsafeFromString(s"/game/${bobby.uuid}"))
-      val task: Task[MaybeResponse] = callService(req)
+      val task: OptionT[IO, Response[IO]] = callService(req)
 
-      lazy val result: Response = task.unsafeRun().orNotFound
+      lazy val result: Response[IO] = task.value.unsafeRunSync().getOrElse(notFound)
 
       "Return a 200 if the game does not exist" in {
         assert(result.status.responseClass.isSuccess)

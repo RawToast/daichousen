@@ -2,27 +2,26 @@ package chousen.http4s
 
 import java.util.UUID
 
+import cats.effect.IO
 import chousen.api.core.GameAccess
 import chousen.api.data._
 import chousen.game.core.GameStateCreation
 import chousen.game.status.StatusCalculator
-import fs2.Task
 import io.circe.syntax._
 import io.circe.{Encoder, Json, Printer}
-import org.http4s.{EntityEncoder, Header}
-//import org.http4s.dsl.{->, /, Created, CreatedSyntax, GET, IntVar, Ok, OkSyntax, POST, QueryParamDecoderMatcher, Root}
+import org.http4s.dsl.impl.QueryParamDecoderMatcher
 import org.http4s.circe.jsonEncoderWithPrinter
-import org.http4s.dsl._
-import org.http4s.{HttpService, Response}
+import org.http4s.dsl.io._
+import org.http4s.{EntityEncoder, HttpService, Response}
 
-class CrudService(pbga: GameAccess[Task, Response], creator: GameStateCreation, sc: StatusCalculator) extends ChousenCookie {
+class CrudService(pbga: GameAccess[IO, Response[IO]], creator: GameStateCreation, sc: StatusCalculator) extends ChousenCookie {
 
   object NameMatcher extends QueryParamDecoderMatcher[String]("name")
 
-  val routes: HttpService = {
+  val routes: HttpService[IO] = {
     import io.circe.generic.extras.semiauto.deriveEnumerationEncoder
 
-    implicit def jsonEnc: EntityEncoder[Json] = jsonEncoderWithPrinter(Printer.noSpaces.copy(dropNullKeys = true))
+    implicit def jsonEnc: EntityEncoder[IO, Json] = jsonEncoderWithPrinter(Printer.noSpaces.copy(dropNullValues = true))
     implicit def statusEncoder: Encoder[StatusEffect] = deriveEnumerationEncoder[StatusEffect]
     import io.circe.generic.auto._
 
@@ -39,7 +38,7 @@ class CrudService(pbga: GameAccess[Task, Response], creator: GameStateCreation, 
           val ng = game.copy(player = sc.calculate(game.player))
           val resp = ng.asResponse
           //Access-Control-Allow-Origin: *
-          Ok(resp.asJson).putHeaders(Header("Access-Control-Allow-Origin", "*"))
+          Ok(resp.asJson)
         }
 
       //  create
@@ -53,7 +52,7 @@ class CrudService(pbga: GameAccess[Task, Response], creator: GameStateCreation, 
           resp = game.asResponse
           asJson: Json = resp.asJson
           result <- Created(asJson)
-        } yield result.putHeaders(Header("Access-Control-Allow-Origin", "*"))
+        } yield result
 
       //  create
       case req@POST -> Root / "game" / playerName / "start" / IntVar(choice) => // used
@@ -65,10 +64,8 @@ class CrudService(pbga: GameAccess[Task, Response], creator: GameStateCreation, 
           resp = game.asResponse
           asJson: Json = resp.asJson
           result <- Created(asJson)
-        } yield result.putHeaders(Header("Access-Control-Allow-Origin", "*"))
+        } yield result
     }
   }
 
-
 }
-
